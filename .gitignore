@@ -43,4 +43,6 @@ out/
 
 /src/main/resources/local-application.yml
 /src/main/resources/dev-application.yml
+/src/main/resources/application-test.yml
+/src/main/resources/*.yml
 /src/main/generated/*
