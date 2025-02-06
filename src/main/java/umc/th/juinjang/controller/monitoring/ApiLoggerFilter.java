@@ -13,35 +13,35 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @Slf4j
-public class APILoggerFilter extends OncePerRequestFilter {
-
-  private final APILoggerPrinter apiLoggerPrinter = new APILoggerPrinter();
-  private static final Logger logger = getLogger(APILoggerFilter.class);
-  private final AntPathMatcher pathMatcher = new AntPathMatcher();
+public class ApiLoggerFilter extends OncePerRequestFilter {
+  private static final Logger logger = getLogger(ApiLoggerFilter.class);
+  private final ApiLoggerFactory apiLoggerFactory;
   private final List<String> EXCLUDED_URLS;
 
-  public APILoggerFilter(List<String> EXCLUDED_URLS) {
+  public ApiLoggerFilter(List<String> EXCLUDED_URLS) {
     this.EXCLUDED_URLS = EXCLUDED_URLS;
+    this.apiLoggerFactory = new ApiLoggerFactory();
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain chain ) {
-    CustomContentCachingHttpRequestWrapper requestWrapper =  new CustomContentCachingHttpRequestWrapper(servletRequest);
-    ContentCachingResponseWrapper responseWrapper =  new ContentCachingResponseWrapper(servletResponse);
+  protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain chain) {
+    ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(servletRequest);
+    ContentCachingResponseWrapper response =  new ContentCachingResponseWrapper(servletResponse);
     registerRequestId(UUID.randomUUID().toString());
 
     try {
-      if (shouldNotFilter(requestWrapper)) {
-        chain.doFilter(requestWrapper, responseWrapper);
+      if (shouldNotFilter(request)) {
+        chain.doFilter(request, response);
         return;
       }
-      apiLoggerPrinter.print(new APIRequestLoggerGenerator(requestWrapper));
-      chain.doFilter(requestWrapper, responseWrapper);
-      apiLoggerPrinter.print(new APIResponseLoggerGenerator(responseWrapper));
-      responseWrapper.copyBodyToResponse();
+      chain.doFilter(request, response);
+      apiLoggerFactory.createRequestLogger(request);
+      apiLoggerFactory.createResponseLogger(response);
+      response.copyBodyToResponse();
     } catch (Exception e) {
       logger.error("APILogger 필터 오류");
     } finally {
@@ -51,6 +51,7 @@ public class APILoggerFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
+    AntPathMatcher pathMatcher = new AntPathMatcher();
     return EXCLUDED_URLS.stream().anyMatch(pattern -> pathMatcher.match(pattern, request.getRequestURI()));
   }
 }
