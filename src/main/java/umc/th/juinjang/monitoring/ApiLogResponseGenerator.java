@@ -1,14 +1,14 @@
-package umc.th.juinjang.controller.monitoring;
+package umc.th.juinjang.monitoring;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
-public class APIResponseLoggerGenerator extends APILoggerGenerator {
+public class ApiLogResponseGenerator extends ApiLogGenerator {
   private final ContentCachingResponseWrapper response;
 
-  public APIResponseLoggerGenerator(ContentCachingResponseWrapper response) {
+  public ApiLogResponseGenerator(ContentCachingResponseWrapper response) {
     this.response = response;
   }
 

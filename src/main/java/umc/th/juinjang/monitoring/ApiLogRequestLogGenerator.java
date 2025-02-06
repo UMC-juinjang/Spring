@@ -1,15 +1,16 @@
-package umc.th.juinjang.controller.monitoring;
+package umc.th.juinjang.monitoring;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
-public class APIRequestLoggerGenerator extends APILoggerGenerator{
+public class ApiLogRequestLogGenerator extends ApiLogGenerator {
 
-  private final CustomContentCachingHttpRequestWrapper request;
+  private final ContentCachingRequestWrapper request;
 
-  public APIRequestLoggerGenerator(CustomContentCachingHttpRequestWrapper request) {
+  public ApiLogRequestLogGenerator(ContentCachingRequestWrapper request) {
     this.request = request;
   }
 
@@ -22,7 +23,7 @@ public class APIRequestLoggerGenerator extends APILoggerGenerator{
     logBuilder.append("[method] ").append(request.getMethod()).append(" ");
     logBuilder.append("[uri] ").append(getQuery()).append(" ");
     logBuilder.append("[headers] ").append(getHeadersAsString(request)).append(" ");
-    logBuilder.append("[requestBody] ").append(getBody(request.getCachedBody())).append(" ");
+    logBuilder.append("[requestBody] ").append(getBody(request.getContentAsByteArray())).append(" ");
 
     return logBuilder.toString();
   }

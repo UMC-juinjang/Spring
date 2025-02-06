@@ -1,15 +1,15 @@
-package umc.th.juinjang.controller.monitoring;
+package umc.th.juinjang.monitoring;
 
 import static umc.th.juinjang.utils.LoggerProvider.getLogger;
 
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
-public abstract class APILoggerGenerator {
+public abstract class ApiLogGenerator {
 
-  protected static final Logger logger = getLogger(APILoggerGenerator.class);
+  protected static final Logger logger = getLogger(ApiLogGenerator.class);
 
-  public APILoggerGenerator() {
+  public ApiLogGenerator() {
   }
 
   protected StringBuilder getBaseLogInfo() {

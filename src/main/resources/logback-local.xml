@@ -12,7 +12,7 @@
     <appender-ref ref="CONSOLE_ERROR_FILE"/>
   </root>
 
-  <logger name="umc.th.juinjang.controller.monitoring.APILoggerPrinter" level="INFO" additivity="false">
+  <logger name="umc.th.juinjang.monitoring.ApiLogPrinter" level="INFO" additivity="false">
     <appender-ref ref="API_FILE"/>
     <appender-ref ref="API_CONSOLE"/>
   </logger>

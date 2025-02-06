@@ -1,4 +1,4 @@
-package umc.th.juinjang.controller.monitoring;
+package umc.th.juinjang.monitoring;
 
 import static umc.th.juinjang.utils.LoggerProvider.getLogger;
 import static umc.th.juinjang.utils.LoggerProvider.registerRequestId;
