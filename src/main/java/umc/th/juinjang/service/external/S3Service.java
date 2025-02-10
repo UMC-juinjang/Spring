@@ -5,37 +5,41 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.File;
-import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Value;
 import umc.th.juinjang.apiPayload.code.status.ErrorStatus;
 import umc.th.juinjang.apiPayload.exception.handler.S3Handler;
 
 @Slf4j
-@RequiredArgsConstructor    // final 멤버변수가 있으면 생성자 항목에 포함시킴
-@Component
+@RequiredArgsConstructor
 @Service
 public class S3Service {
-
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final AmazonS3Client amazonS3Client;
 
   @Value("${cloud.aws.s3.bucket}")
   private String bucket;
 
-  // MultipartFile을 전달받아 File로 전환한 후 S3에 업로드
-  public String upload(MultipartFile multipartFile, String dirName) throws IOException {
-    File uploadFile = convert(multipartFile)
-        .orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File 전환 실패"));
-    return upload(uploadFile, dirName, multipartFile.getInputStream(), multipartFile.getSize(), multipartFile.getContentType());
+  public String upload(MultipartFile multipartFile, String dirName) {
+    File uploadFile = convert(multipartFile).orElseThrow(() -> new S3Handler(ErrorStatus.IMAGE_EMPTY));
+
+    try {
+      return upload(uploadFile, dirName, multipartFile.getInputStream(), multipartFile.getSize(), multipartFile.getContentType());
+    } catch (Exception e) {
+      logger.error("파일 업로드 중 error 발생");
+      throw new S3Handler(ErrorStatus._INTERNAL_SERVER_ERROR);
+    }
   }
 
   private String upload(File uploadFile,String dirName, InputStream inputStream, Long fileSize, String contentType) {
@@ -72,16 +76,22 @@ public class S3Service {
     }
   }
 
-  private Optional<File> convert(MultipartFile file) throws  IOException {
-    String originalFilename = file.getOriginalFilename();
-    String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_");
-    File convertFile = new File(safeFilename);
+  private Optional<File> convert(MultipartFile file) {
+    try {
+      String originalFilename = file.getOriginalFilename();
+      String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_");
+      File convertFile = new File(safeFilename);
 
-    if(convertFile.createNewFile()) {
-      try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-        fos.write(file.getBytes());
+      if (convertFile.createNewFile()) {
+        try (FileOutputStream fos = new FileOutputStream(convertFile)) {
+          fos.write(file.getBytes());
+        }
+        return Optional.of(convertFile);
+      } else {
+        return Optional.empty();
       }
-      return Optional.of(convertFile);
+    } catch (Exception e) {
+      logger.error("파일 변환 중 error 발생" +e);
     }
     return Optional.empty();
   }

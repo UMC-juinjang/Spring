@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.th.juinjang.apiPayload.code.status.ErrorStatus;
 import umc.th.juinjang.apiPayload.exception.handler.LimjangHandler;
-import umc.th.juinjang.converter.image.ImageListConverter;
-import umc.th.juinjang.model.dto.image.ImageListResponseDTO;
+import umc.th.juinjang.model.dto.image.ImagesGetResponse;
 import umc.th.juinjang.model.entity.Image;
 import umc.th.juinjang.model.entity.Limjang;
 import umc.th.juinjang.repository.image.ImageRepository;
@@ -24,13 +23,13 @@ public class ImageQueryServiceImpl implements ImageQueryService {
 
   @Override
   @Transactional(readOnly = true)
-  public ImageListResponseDTO.ImagesListDTO getImageList(Long limjangId) {
-    Limjang findLimjang = limjangRepository.findById(limjangId)
-        .orElseThrow(() -> new LimjangHandler(ErrorStatus.LIMJANG_NOTFOUND_ERROR));
+  public ImagesGetResponse getImageList(final long limjangId) {
+    Limjang limjang = getLimjang(limjangId);
+    List<Image> images = imageRepository.findImagesByLimjangId(limjang);
+    return ImagesGetResponse.of(images);
+  }
 
-    List<Image> imageList = imageRepository.findImagesByLimjangId(findLimjang);
-
-    return ImageListConverter.toImageListDto(imageList);
-
+  private Limjang getLimjang(final long limjangId) {
+    return limjangRepository.findByLimjangIdAndDeletedIsFalse(limjangId).orElseThrow(() -> new LimjangHandler(ErrorStatus.LIMJANG_NOTFOUND_ERROR));
   }
 }

@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import umc.th.juinjang.model.dto.image.ImageDeleteRequestDTO;
 
 public interface ImageCommandService {
-    void uploadImages(Long limjangId, List<MultipartFile> images);
+    void createImages(long limjangId, List<MultipartFile> images);
 
     void deleteImages(ImageDeleteRequestDTO.DeleteDto ids);
 

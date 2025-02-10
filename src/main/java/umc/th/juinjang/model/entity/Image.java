@@ -36,4 +36,10 @@ public class Image extends BaseEntity {
   @Column(nullable = false)
   private String imageUrl;
 
+  public static Image create(String imageUrl, Limjang limjang) {
+    return Image.builder()
+        .imageUrl(imageUrl)
+        .limjangId(limjang)
+        .build();
+  }
 }

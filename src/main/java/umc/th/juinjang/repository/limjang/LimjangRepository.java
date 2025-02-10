@@ -49,5 +49,8 @@ public interface LimjangRepository extends JpaRepository<Limjang, Long>, Limjang
   Optional<Limjang> findByLimjangIdAndMemberIdWithLimjangPriceAndDeletedIsFalse(@Param("id") Long id, @Param("member") Member member);
 
   @Query("SELECT l FROM Limjang l join fetch l.limjangPrice left join fetch l.report WHERE l.limjangId = :id AND l.memberId = :member AND l.deleted = false")
-  Optional<Limjang> findByLimjangIdAndDeletedIsFalse(@Param("id") Long id, @Param("member") Member member);
+  Optional<Limjang> findByLimjangIdAndMemberAndDeletedIsFalse(@Param("id") Long id, @Param("member") Member member);
+
+  @Query("SELECT l FROM Limjang l WHERE l.limjangId = :id AND l.deleted = false")
+  Optional<Limjang> findByLimjangIdAndDeletedIsFalse(@Param("id") Long id);
 }
